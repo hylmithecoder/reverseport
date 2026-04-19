@@ -26,6 +26,7 @@ func CreateProxyHandler(target string, basePath string) http.Handler {
 	}
 
 	proxy := httputil.NewSingleHostReverseProxy(targetURL)
+	proxy.FlushInterval = 100 * time.Millisecond // Optimization for WebSockets/HMR
 
 	// Director: strip basePath before forwarding to upstream
 	proxy.Director = func(req *http.Request) {
@@ -46,6 +47,11 @@ func CreateProxyHandler(target string, basePath string) http.Handler {
 		// Accept-Encoding: keep gzip but we handle decompression in ModifyResponse
 		if req.Header.Get("Accept-Encoding") != "" {
 			req.Header.Set("Accept-Encoding", "gzip")
+		}
+
+		// Ensure WebSocket headers are preserved through the proxy
+		if strings.ToLower(req.Header.Get("Upgrade")) == "websocket" {
+			req.Header.Set("Connection", "Upgrade")
 		}
 	}
 
@@ -95,6 +101,8 @@ func CreateProxyHandler(target string, basePath string) http.Handler {
 			{`"/_next/`, `"` + basePath + `/_next/`},
 			{`'/_next/`, `'` + basePath + `/_next/`},
 			{"=/_next/", "=" + basePath + "/_next/"},
+			{`/_next/webpack-hmr`, basePath + `/_next/webpack-hmr`}, // Explicit HMR path
+			{`"webpack-hmr"`, `"` + basePath + `/_next/webpack-hmr"`}, // Sometimes used in Next.js config
 			{`"/__nextjs`, `"` + basePath + `/__nextjs`},
 			{`'/__nextjs`, `'` + basePath + `/__nextjs`},
 			// next/image src rewriting
