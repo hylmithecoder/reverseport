@@ -1,0 +1,6 @@
+*.go.mcp_bak
+*.json.mcp_bak
+.env
+portproxy
+portproxy-routes.conf
+routes.json
