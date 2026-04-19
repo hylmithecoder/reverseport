@@ -128,7 +128,7 @@ var loginHTML = `<!DOCTYPE html>
     <form method="POST" action="/login">
       <div class="form-group">
         <label>Username</label>
-        <input type="text" name="username" required autofocus placeholder="mogagacor">
+        <input type="text" name="username" required autofocus placeholder="yourusername">
       </div>
       <div class="form-group">
         <label>Password</label>
